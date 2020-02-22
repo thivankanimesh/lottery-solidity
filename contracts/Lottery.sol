@@ -4,13 +4,14 @@ contract Lottery {
     
     address public manager;
     address[] public players;
+    address public winnerAddress;
     
     constructor() public {
         manager = msg.sender;
     }
     
     function enter() public payable {
-        require(msg.value > .01 ether);
+        require(msg.value > .01 ether,'Ether value need to be greater than 0.01 ether');
         players.push(msg.sender);
     }
     
@@ -20,13 +21,17 @@ contract Lottery {
     
     function pickWinner() public payable restricted {
         uint256 index = random()%players.length;
-        address addr = players[index];
-        addr.transfer(this.balance);
+        winnerAddress = players[index];
+        winnerAddress.transfer(address(this).balance);
         players = new address[](0);
+    }
+
+    function getWinnerAddress() public view returns (address) {
+        return winnerAddress;
     }
     
     modifier restricted() {
-        require(msg.sender == manager);
+        require(msg.sender == manager, 'Only manager can pick winner');
         _;
     }
     
